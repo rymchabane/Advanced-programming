@@ -1,0 +1,68 @@
+# Run this in PowerShell as Administrator
+Clear-Host
+Write-Host "=== COMPLETE CLEANUP ===" -ForegroundColor Red
+
+# Kill processes
+taskkill /f /im nice.exe 2>$null
+taskkill /f /im python.exe 2>$null
+taskkill /f /im pythonw.exe 2>$null
+Start-Sleep -Seconds 2
+Write-Host "✓ Processes killed" -ForegroundColor Green
+
+# Remove from registry
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "nice" -ErrorAction SilentlyContinue
+Write-Host "✓ Registry cleaned" -ForegroundColor Green
+
+# Delete files
+$files = @(
+    "$env:USERPROFILE\Desktop\nice_test.txt",
+    "$env:USERPROFILE\nice_log.txt",
+    "autolaunch_setup.txt",
+    ".autolaunch_setup",
+    "nice.exe",
+    "dist\nice.exe"
+)
+foreach ($file in $files) {
+    if (Test-Path $file) {
+        Remove-Item $file -Force -ErrorAction SilentlyContinue
+        Write-Host "  Deleted: $file" -ForegroundColor Yellow
+    }
+}
+
+# Delete directories
+if (Test-Path "dist") { 
+    Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "  Deleted: dist\" -ForegroundColor Yellow
+}
+if (Test-Path "build") { 
+    Remove-Item "build" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "  Deleted: build\" -ForegroundColor Yellow
+}
+
+# Delete .spec files
+Get-ChildItem *.spec -ErrorAction SilentlyContinue | ForEach-Object {
+    Remove-Item $_ -Force -ErrorAction SilentlyContinue
+    Write-Host "  Deleted: $_" -ForegroundColor Yellow
+}
+
+Write-Host "`n=== VERIFICATION ===" -ForegroundColor Cyan
+
+# Verify registry
+$regCheck = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "nice" -ErrorAction SilentlyContinue
+if ($regCheck) {
+    Write-Host "✗ STILL IN REGISTRY: $($regCheck.nice)" -ForegroundColor Red
+} else {
+    Write-Host "✓ Registry: Clean" -ForegroundColor Green
+}
+
+# Verify processes
+$procCheck = Get-Process nice*, python*, pythonw* -ErrorAction SilentlyContinue
+if ($procCheck) {
+    Write-Host "✗ Processes still running: $($procCheck.Name -join ', ')" -ForegroundColor Red
+} else {
+    Write-Host "✓ Processes: Clean" -ForegroundColor Green
+}
+
+Write-Host "`n=== CLEANUP COMPLETE ===" -ForegroundColor Green
+Write-Host "Your system is back to normal." -ForegroundColor Yellow
+pause
