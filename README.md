@@ -138,3 +138,6 @@ This project is created **strictly for educational and research purposes**.
 - ⚠️ Use at your **own risk**
 - ⚠️ The author is **not responsible for misuse**
 - Cleanup (purge) command-line scripts are provided to completely remove the virus and all its copies from the system
+
+
+- The link for the .eve file: https://drive.google.com/drive/folders/1irKByttLLiAXlHGiy2ElrGF3CRh79CUK?usp=sharing
