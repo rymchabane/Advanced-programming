@@ -140,4 +140,4 @@ This project is created **strictly for educational and research purposes**.
 - Cleanup (purge) command-line scripts are provided to completely remove the virus and all its copies from the system
 
 
-- The link for the .eve file: https://drive.google.com/drive/folders/1irKByttLLiAXlHGiy2ElrGF3CRh79CUK?usp=sharing
+- The link for the .exe file: https://drive.google.com/drive/folders/1irKByttLLiAXlHGiy2ElrGF3CRh79CUK?usp=sharing
